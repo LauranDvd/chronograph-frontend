@@ -6,6 +6,10 @@ import { Socket } from "socket.io-client";
 interface ChatMessage {
     sender: "User" | "Model" | "Error";
     content: string;
+    liked?: boolean;
+    disliked?: boolean;
+    isLikeAvailable?: boolean;
+    isDislikeAvailable?: boolean;
 }
 
 const SOCKET_URL = "http://localhost:5000"; // Update this if your Flask backend is on a different URL
@@ -28,7 +32,7 @@ const ChatApp: React.FC = () => {
             if (data.message) {
                 setMessages((prevMessages) => [
                     ...prevMessages,
-                    { sender: "Model", content: data.message! },
+                    { sender: "Model", content: data.message!, isLikeAvailable: true, isDislikeAvailable: true },
                 ]);
             }
             if (data.error) {
@@ -70,6 +74,36 @@ const ChatApp: React.FC = () => {
         setUserMessage(e.target.value);
     };
 
+    const handleLike = (index: number) => {
+        if (socket) {
+            console.log(`emitting like`);
+            socket.emit("like", { index });
+        } else {
+            console.log(`cannot emit like. no socket`);
+        }
+
+        setMessages(prev => {
+            const updated = [...prev];
+            updated[index].liked = true;
+            updated[index].isDislikeAvailable = false;
+            return updated;
+        });
+    };
+
+    const handleDislike = (index: number) => {
+        if (socket) {
+            socket.emit("dislike", { index });
+        }
+
+        setMessages(prev => {
+            const updated = [...prev];
+            updated[index].disliked = true;
+            updated[index].isLikeAvailable = false;
+            return updated;
+        });
+    };
+
+
     return (
         <div>
             <h2>ChronoGraph:3000 Odyssey, Intelligent Historical Connections</h2>
@@ -79,6 +113,31 @@ const ChatApp: React.FC = () => {
                 {messages.map((msg, index) => (
                     <div key={index} style={{ marginBottom: "10px" }}>
                         <strong>{msg.sender}:</strong> {msg.content}
+                        {msg.sender === "Model" && (
+                            <div style={{ marginTop: "5px" }}>
+                                {msg.isLikeAvailable && <button
+                                    onClick={() => handleLike(index)}
+                                    disabled={msg.liked}
+                                    style={{
+                                        marginRight: "8px",
+                                        color: msg.liked ? "green" : "black",
+                                        cursor: msg.liked ? "default" : "pointer"
+                                    }}
+                                >
+                                    👍 {msg.liked ? "Liked" : "Like"}
+                                </button>}
+                                {msg.isDislikeAvailable && <button
+                                    onClick={() => handleDislike(index)}
+                                    disabled={msg.disliked}
+                                    style={{
+                                        color: msg.disliked ? "red" : "black",
+                                        cursor: msg.disliked ? "default" : "pointer"
+                                    }}
+                                >
+                                    👎 {msg.disliked ? "Disliked" : "Dislike"}
+                                </button>}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
