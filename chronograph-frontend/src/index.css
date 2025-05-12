@@ -28,6 +28,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #1b1b1b;
 }
 
 h1 {
@@ -65,4 +66,20 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.cinzel-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: #d4af37;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.4;
+  letter-spacing: 1px;
+}
+.cinzel-subtitle {
+  font-size: 1rem;
+  color: #ccc;
+  opacity: 0.85;
+  font-style: italic;
 }
